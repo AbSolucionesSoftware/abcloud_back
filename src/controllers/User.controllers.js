@@ -11,21 +11,15 @@ const modelBlackList = require("../models/BlackListPassword");
 const modelCourse = require("../models/Course");
 const modelInscription = require("../models/Inscription");
 const moment = require("moment");
-const morgan = require("morgan");
-
 
 userCtrl.uploadFile = async (req, res, next) => {
-  try {
-    await uploadFile.upload(req, res, function (err) {
-      if (err) {
-        res.status(500).json({ message: err });
-      }
-      return next();
-    });
-  } catch (error) {
-    res.status(500).json({ message: error });
-    console.log(error);
-  }
+  uploadFile.upload(req, res, function (err) {
+    if (err) {
+      console.log(err.message || 'Something went wrong uploading image aws')
+      return res.status(500).json({ message: err.message || 'Something went wrong uploading image aws' });
+    }
+    return next();
+  });
 };
 
 userCtrl.createUser = async (req, res) => {
@@ -170,7 +164,7 @@ userCtrl.editUser = async (req, res) => {
       res.status(500).json({ message: "Error de datos enviados." });
     } else {
       const userBase = await modelUser.findById(req.params.idUser);
-      const {messagingTokens, ...updateUser}  = req.body;
+      const { messagingTokens, ...updateUser } = req.body;
       if (userBase) {
         if (req.file) {
           updateUser.keyImage = req.file.key;
@@ -221,7 +215,7 @@ userCtrl.courseUser = async (req, res) => {
 userCtrl.signInUser = async (req, res) => {
   try {
     const { email, password, messagingToken } = req.body;
-    console.log(messagingToken)
+    console.log(messagingToken);
     const userBase = await modelUser.findOne({ email: email });
     if (userBase) {
       if (userBase.sessiontype === "Firebase") {
@@ -422,7 +416,7 @@ userCtrl.verifyResetPassword = async (req, res) => {
 userCtrl.userFirebaseSign = async (req, res) => {
   try {
     const { email, name, messagingToken } = req.body;
-    console.log(messagingToken)
+    console.log(messagingToken);
     if (!email || !name) {
       res.status(500).json({ message: "Algo fallo" });
     } else {
